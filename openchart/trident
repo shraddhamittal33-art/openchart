@@ -1,0 +1,28 @@
+import pandas as pd
+import datetime
+import yfinance as yf
+
+# Define stock and date range
+symbol = "TRIDENT.NS"
+end_date = datetime.date.today()
+start_date = end_date - datetime.timedelta(days=45)  # buffer for weekends
+
+# Download daily (EOD) data
+data = yf.download(symbol, start=start_date, end=end_date, interval='1d')
+
+# Clean and reset index
+data.reset_index(inplace=True)
+data = data[['Date', 'Open', 'High', 'Low', 'Close', 'Volume']]
+
+# Get last 30 trading days only
+data = data.tail(30)
+
+# Add dummy "10:00 AM Price" (as EOD doesn't have intraday)
+# You can simulate it using (Open + High)/2 or just Open
+data['Price_10AM'] = (data['Open'] + data['High']) / 2
+
+# Save to Excel
+data.to_excel('Trident_last_30_days.xlsx', index=False)
+
+print("✅ Excel file saved as 'Trident_last_30_days.xlsx'")
+
